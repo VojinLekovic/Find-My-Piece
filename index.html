@@ -335,15 +335,19 @@
     <script>
         let gameOver = false;
         let gameStarted = false;
+        let clickedWhitePieces = 0;
+        let totalWhitePieces = 0;
 
         async function movePieces() {
             if (gameOver) {
                 return;
             }
             gameStarted = true;
+            clickedWhitePieces = 0;
             const fen = await getRandomFEN();
             setBoardFromFEN(fen);
             updatePieceCounts(fen);
+            calculateTotalWhitePieces(fen);
 
         }
 
@@ -389,8 +393,12 @@
                     }
                     if (square.classList.contains('piece')) {
                         if (square.classList.contains('white-pawn') || square.classList.contains('white-rook') || square.classList.contains('white-knight') || square.classList.contains('white-bishop') || square.classList.contains('white-queen') || square.classList.contains('white-king')) {
-                            square.classList.add('white-piece-color');
-                            square.classList.remove('hidden-piece');
+                            if (!square.classList.contains('white-piece-color')) {
+                                square.classList.add('white-piece-color');
+                                square.classList.remove('hidden-piece');
+                                clickedWhitePieces++;
+                                checkWin(clickedWhitePieces, totalWhitePieces);
+                            }
                         } else if (square.classList.contains('black-pawn') || square.classList.contains('black-rook') || square.classList.contains('black-knight') || square.classList.contains('black-bishop') || square.classList.contains('black-queen') || square.classList.contains('black-king')) {
                             document.querySelectorAll('.piece').forEach(piece => piece.classList.remove('hidden-piece'));
                             //document.querySelectorAll('.empty-square-color').forEach(square => square.classList.remove('empty-square-color'));
@@ -450,9 +458,29 @@
             document.getElementById('black-king-counter').innerText = `1/1`;
         }
 
+        function calculateTotalWhitePieces(fen) {
+            totalWhitePieces = 0;
+            for (let i = 0; i < fen.length; i++) {
+                if (fen[i] === 'P' || fen[i] === 'R' || fen[i] === 'N' || fen[i] === 'B' || fen[i] === 'Q' || fen[i] === 'K') {
+                    totalWhitePieces++;
+                }
+            }
+            message = `Total White Pieces Needed to be found: ${totalWhitePieces}`;
+            alert(message);
+        }
+
+        function checkWin(clickedWhitePieces, totalWhitePieces) {
+            if (clickedWhitePieces === totalWhitePieces) {
+                alert('Congratulations! You found all the white pieces!');
+                gameOver = true;
+            }
+        }
+
         function resetBoard() {
             gameOver = false;
             gameStarted = false;
+            clickedWhitePieces = 0;
+            totalWhitePieces = 0;
             let fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
             setBoardFromFEN(fen);
             updatePieceCounts(fen);
